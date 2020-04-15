@@ -23,6 +23,11 @@ public class GameManager : MonoBehaviour
         
     }
 
+    private void GameLoop()
+    {
+
+    }
+
     void CreatePlayer(int PlayerNum)
     {
         GameObject Player = new GameObject("player" + PlayerNum, typeof(SpriteRenderer));

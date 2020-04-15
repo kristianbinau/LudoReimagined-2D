@@ -5,7 +5,8 @@ using UnityEngine;
 public class Piece : MonoBehaviour
 {
     public int PlayerId;
-    public string PositionType ;
+    public bool StandingOnProtected;
+    private string PositionType;
     private int PositionNum;
 
     // Start is called before the first frame update
@@ -42,7 +43,7 @@ public class Piece : MonoBehaviour
     }
 
     // Sends Piece to Home.
-    public void SendHome() // Needs to be shortened.
+    public void SendHome()
     {
         new Move(gameObject);
     }
