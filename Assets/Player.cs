@@ -54,7 +54,7 @@ public abstract class Player : MonoBehaviour
         
     }
 
-    void CreatePiece(int Number)
+    private void CreatePiece(int Number)
     {
         GameObject Piece = new GameObject("Piece" + Number, typeof(SpriteRenderer));
         Piece.AddComponent<Piece>().PlayerId = PId;
