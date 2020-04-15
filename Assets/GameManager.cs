@@ -23,7 +23,12 @@ public class GameManager : MonoBehaviour
         
     }
 
-    void CreatePlayer(int PlayerNum)
+    private void GameLoop()
+    {
+
+    }
+
+    private void CreatePlayer(int PlayerNum)
     {
         GameObject Player = new GameObject("player" + PlayerNum, typeof(SpriteRenderer));
         Player.AddComponent<HumanPlayer>().Create(PlayerNum);

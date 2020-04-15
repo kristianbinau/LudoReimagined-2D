@@ -20,109 +20,21 @@ public class Move
         PieceScript = Pce.GetComponent<Piece>();
         Length = Lngth;
 
-        //Maybe Switch
-        if (PieceScript.PositionType == null)
+        if (Length == 0)
         {
             MovePieceHome();
         }
-        else if (PieceScript.PositionType == "Field")
+        else
         {
-            MovePieceFromField();
-        }
-        else if (PieceScript.PositionType == "Home")
-        {
-            MovePieceFromHome();
-        }
-    }
-
-    private void MovePieceFromField() //Piece is in field
-    {
-        MakeMoveValid();
-        PieceInField = DataManager.Data[LandingType][LandingNum].GetComponent<Field>().Piece;
-        PieceInFieldScript = PieceInField != null ? PieceInField.GetComponent<Piece>() : null;
-
-
-
-        if (PieceInField == null) //Empty
-        {
-            DataManager.Data[PieceScript.GetPositionType()][PieceScript.GetPositionNum()].GetComponent<Field>().Piece = null; //Remove old PieceLocation
-            
-            PieceInField = Piece;
-            Piece.transform.position = DataManager.Data[LandingType][LandingNum].transform.position;
-            Piece.GetComponent<Piece>().SetPosition(LandingType, LandingNum);
-        }
-        else if (PieceInFieldScript.PlayerId == PieceScript.PlayerId) //Own Piece is there
-        {
-            Piece.GetComponent<Piece>().SendHome();
-        }
-        else //Opponent is there
-        {
-            DataManager.Data[PieceScript.GetPositionType()][PieceScript.GetPositionNum()].GetComponent<Field>().Piece = null; //Remove old PieceLocation
-
-            PieceInFieldScript.SendHome();
-            PieceInField = Piece;
-            Piece.transform.position = DataManager.Data[LandingType][LandingNum].transform.position;
-            Piece.GetComponent<Piece>().SetPosition(LandingType, LandingNum);
-        }
-
-        DataManager.Data[LandingType][LandingNum].GetComponent<Field>().Piece = PieceInField;
-    }
-
-    private void MovePieceFromHome() //Move Piece from home to field
-    {
-        LandingType = "Field";
-
-        if (Length == 6)
-        {
-            switch (PieceScript.PlayerId)
+            switch (PieceScript.GetPositionType())
             {
-                case 1:
-                    LandingNum = 26;
+                case "Field":
+                    MovePieceFromField();
                     break;
-                case 2:
-                    LandingNum = 13;
-                    break;
-                case 3:
-                    LandingNum = 39;
-                    break;
-                case 4:
-                    LandingNum = 0;
+                case "Home":
+                    MovePieceFromHome();
                     break;
             }
-            Piece.transform.position = DataManager.Data[LandingType][LandingNum].transform.position;
-            Piece.GetComponent<Piece>().SetPosition(LandingType, LandingNum);
-        }
-    }
-
-    private void MovePieceHome() //Move Piece home
-    {
-        if (PieceScript.PositionType != null)
-        {
-            DataManager.Data[PieceScript.GetPositionType()][PieceScript.GetPositionNum()].GetComponent<Home>().Piece = null;
-        }
-
-        LandingType = "Home";
-        LandingNum = CheckHome();
-        DataManager.Data[LandingType][LandingNum].GetComponent<Home>().Piece = Piece;
-        Piece.transform.position = DataManager.Data[LandingType][LandingNum].transform.position;
-        PieceScript.SetPosition(LandingType, LandingNum);
-    }
-
-    /*
-     * Check if a move is valid
-     * Should work by sending a integer as a "code".
-     * Code 0 - Valid
-     * Code 1 - ArrayOutOfBounds
-     * 
-     */
-    private void MakeMoveValid()
-    {
-        LandingType = PieceScript.GetPositionType();
-        LandingNum = PieceScript.GetPositionNum() + Length;
-
-        if (LandingType == "Field" && LandingNum > 52) //ArrayOutOfBounds
-        {
-            LandingNum = (PieceScript.GetPositionNum() + Length) - 52;
         }
     }
 
@@ -142,7 +54,7 @@ public class Move
                 StartInt = 12;
                 break;
         }
-        for (int i = StartInt;StartInt+4 > i ; i++)
+        for (int i = StartInt; StartInt + 4 > i; i++)
         {
             if (DataManager.Data["Home"][i].GetComponent<Home>().Piece == null)
             {
@@ -150,5 +62,149 @@ public class Move
             }
         }
         throw new InvalidOperationException();
+    }
+
+    public int CheckFinish()
+    {
+        int StartInt = 0;
+
+        switch (PieceScript.PlayerId)
+        {
+            case 2:
+                StartInt = 5;
+                break;
+            case 3:
+                StartInt = 10;
+                break;
+            case 4:
+                StartInt = 15;
+                break;
+        }
+        for (int i = StartInt; StartInt + 5 > i; i++)
+        {
+            if (DataManager.Data["Finish"][i].GetComponent<Finish>().Piece == null)
+            {
+                return i;
+            }
+        }
+        throw new InvalidOperationException();
+    }
+
+    private void MovePieceFromField() //Move Piece in field
+    {
+        LandingType = PieceScript.GetPositionType();
+        LandingNum = PieceScript.GetPositionNum() + Length;
+        MakeMoveValid();
+        bool Finished = HandleFinish();
+        if (Finished == false)
+        {
+            PieceInField = DataManager.Data[LandingType][LandingNum].GetComponent<Field>().Piece;
+
+            if (PieceInField != null) //Empty
+            {
+                PieceInFieldScript = PieceInField.GetComponent<Piece>();
+                if (PieceInFieldScript.StandingOnProtected)
+                {
+                    PieceScript.SendHome();
+                    return;
+                }
+                PieceInFieldScript.SendHome();
+            }
+
+            DataManager.Data[PieceScript.GetPositionType()][PieceScript.GetPositionNum()].GetComponent<Field>().Piece = null; //Remove old PieceLocation
+
+            Piece.transform.position = DataManager.Data[LandingType][LandingNum].transform.position;
+            PieceScript.SetPosition(LandingType, LandingNum);
+
+            DataManager.Data[LandingType][LandingNum].GetComponent<Field>().Piece = Piece;
+        }
+    }
+
+    private void MovePieceFromHome() //Move Piece from Home to Field
+    {
+        LandingType = PieceScript.GetPositionType();
+        LandingNum = PieceScript.GetPositionNum();
+        DataManager.Data[LandingType][LandingNum].GetComponent<Home>().Piece = null;
+        PieceScript.StandingOnProtected = true;
+        LandingType = "Field";
+
+        if (Length == 6)
+        {
+            switch (PieceScript.PlayerId)
+            {
+                case 1:
+                    LandingNum = 9;
+                    break;
+                case 2:
+                    LandingNum = 48;
+                    break;
+                case 3:
+                    LandingNum = 22;
+                    break;
+                case 4:
+                    LandingNum = 35;
+                    break;
+            }
+
+            Piece.transform.position = DataManager.Data[LandingType][LandingNum].transform.position;
+            PieceScript.SetPosition(LandingType, LandingNum);
+            DataManager.Data[LandingType][LandingNum].GetComponent<Field>().Piece = Piece;
+        }
+    }
+
+    private void MovePieceHome() //Move Piece to Home
+    {
+        if (PieceScript.GetPositionType() != null)
+        {
+            DataManager.Data[PieceScript.GetPositionType()][PieceScript.GetPositionNum()].GetComponent<Field>().Piece = null;
+        }
+
+
+        LandingType = "Home";
+        LandingNum = CheckHome();
+        DataManager.Data[LandingType][LandingNum].GetComponent<Home>().Piece = Piece;
+        Piece.transform.position = DataManager.Data[LandingType][LandingNum].transform.position;
+        PieceScript.SetPosition(LandingType, LandingNum);
+    }
+
+    private void MakeMoveValid() // Check if a move is valid
+    {
+        PieceScript.StandingOnProtected = false;
+        if (LandingType == "Field" && LandingNum > 51) //ArrayOutOfBounds
+        {
+            LandingNum = (PieceScript.GetPositionNum() + Length) - 52;
+        }
+    }
+
+    private bool HandleFinish()
+    {
+        int FinishField;
+        switch (PieceScript.PlayerId)
+        {
+            case 1:
+                FinishField = 7;
+                break;
+            case 2:
+                FinishField = 46;
+                break;
+            case 3:
+                FinishField = 20;
+                break;
+            case 4:
+                FinishField = 33;
+                break;
+            default:
+                throw new InvalidOperationException();
+        }
+        if (FinishField > PieceScript.GetPositionNum() && FinishField <= LandingNum)
+        {
+            LandingType = "Finish";
+            LandingNum = CheckFinish();
+            DataManager.Data[LandingType][LandingNum].GetComponent<Finish>().Piece = Piece;
+            Piece.transform.position = DataManager.Data[LandingType][LandingNum].transform.position;
+            PieceScript.SetPosition(LandingType, LandingNum);
+            return true;
+        }
+        return false;
     }
 }
