@@ -8,7 +8,7 @@ public abstract class Player : MonoBehaviour
     public Color32 PColor;
     public List<GameObject> Pieces = new List<GameObject>();
 
-    public void Create(int PlayerId)
+    public void Create(int PlayerId) // Set Player Values
     {
         int IndexToStartAt = 0;
         switch (PlayerId)
@@ -54,7 +54,7 @@ public abstract class Player : MonoBehaviour
         
     }
 
-    private void CreatePiece(int Number)
+    private void CreatePiece(int Number) // Create Piece GameObject
     {
         GameObject Piece = new GameObject("Piece" + Number, typeof(SpriteRenderer));
         Piece.AddComponent<Piece>().PlayerId = PId;

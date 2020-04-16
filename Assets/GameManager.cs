@@ -28,7 +28,7 @@ public class GameManager : MonoBehaviour
 
     }
 
-    private void CreatePlayer(int PlayerNum)
+    private void CreatePlayer(int PlayerNum) // Create Player
     {
         GameObject Player = new GameObject("player" + PlayerNum, typeof(SpriteRenderer));
         Player.AddComponent<HumanPlayer>().Create(PlayerNum);
