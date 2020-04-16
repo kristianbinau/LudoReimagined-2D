@@ -37,8 +37,8 @@ public class Move
             }
         }
     }
-
-    public int CheckHome()
+    
+    public int CheckHome() // Check which home is the next avaliable
     {
         int StartInt = 0;
 
@@ -64,7 +64,7 @@ public class Move
         throw new InvalidOperationException();
     }
 
-    public int CheckFinish()
+    public int CheckFinish()// Check which finish is the next avaliable
     {
         int StartInt = 0;
 
@@ -80,6 +80,7 @@ public class Move
                 StartInt = 15;
                 break;
         }
+
         for (int i = StartInt; StartInt + 5 > i; i++)
         {
             if (DataManager.Data["Finish"][i].GetComponent<Finish>().Piece == null)
@@ -158,7 +159,6 @@ public class Move
         {
             DataManager.Data[PieceScript.GetPositionType()][PieceScript.GetPositionNum()].GetComponent<Field>().Piece = null;
         }
-
 
         LandingType = "Home";
         LandingNum = CheckHome();
